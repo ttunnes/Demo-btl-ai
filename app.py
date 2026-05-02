@@ -1,4 +1,4 @@
-#Author: Bui Tran Thanh Tung with Ai
+#Author: Bui Tran Thanh Tung 
 import customtkinter as ctk
 import tkinter as tk
 import math
@@ -29,6 +29,9 @@ nodes = {
     "Thác Nước"    : (440, 270),
     "Khu Ẩm Thực"  : (1000, 350),    # ĐÍCH ĐẾN
 }
+
+# Tự động đánh số thứ tự cho các Node (1, 2, 3...)
+node_ids = {name: i+1 for i, name in enumerate(nodes.keys())}
 
 # Các liên kết (Edges)
 connections = [
@@ -135,7 +138,6 @@ class SmartWayUI(ctk.CTk):
         sidebar.pack_propagate(False) 
 
         # Khung chứa các nút điều khiển 
-        # (Điều chỉnh pady=(25, 5) để nó cách mép trên cửa sổ một khoảng vừa đẹp)
         control_frame = ctk.CTkFrame(sidebar, fg_color="#0f172a", corner_radius=10)
         control_frame.pack(fill="x", padx=15, pady=(25, 5))
         box_height = 28 
@@ -189,6 +191,7 @@ class SmartWayUI(ctk.CTk):
         self.canvas.bind("<ButtonPress-1>", self.on_pan_start)
         self.canvas.bind("<B1-Motion>", self.on_pan_move)
         self.canvas.bind("<MouseWheel>", self.on_zoom)
+
     # --- ZOOM & PAN LOGIC ---
     def on_pan_start(self, event):
         self.drag_data["x"] = event.x
@@ -214,7 +217,7 @@ class SmartWayUI(ctk.CTk):
     # --- VẼ ĐỒ THỊ VÀ TRỌNG SỐ ---
     def draw_graph(self):
         self.canvas.delete("all")
-        drawn_edges = set() # Tránh vẽ đè 2 lần do đồ thị vô hướng
+        drawn_edges = set() 
 
         # Vẽ cạnh và khoảng cách
         for u in roads:
@@ -253,9 +256,15 @@ class SmartWayUI(ctk.CTk):
             elif loc in self.closed_nodes: fill_color = "#6366f1"
             elif loc in self.open_nodes: fill_color = "#14b8a6"
 
-            r = max(8, int(10 * self.scale))
-            self.canvas.create_oval(x-r, y-r, x+r, y+r, fill=fill_color, outline="#cbd5e1", width=1)
-            self.canvas.create_text(x, y - r - 12, text=loc, fill="#f8fafc", font=("Arial", 10, "bold"))
+            # Tăng bán kính node lên để chứa lọt số thứ tự
+            r = max(12, int(14 * self.scale))
+            self.canvas.create_oval(x-r, y-r, x+r, y+r, fill=fill_color, outline="#cbd5e1", width=1.5)
+            
+            # Vẽ Số thứ tự (ID) vào giữa Node
+            self.canvas.create_text(x, y, text=str(node_ids[loc]), fill="#ffffff", font=("Arial", max(7, int(9 * self.scale)), "bold"))
+
+            # Vẽ tên Node
+            self.canvas.create_text(x, y - r - 12, text=loc, fill="#f8fafc", font=("Arial", max(8, int(10 * self.scale)), "bold"))
 
     def update_route_panel(self, path=None, dist=0):
         self.txt_route.configure(state="normal")
@@ -267,8 +276,12 @@ class SmartWayUI(ctk.CTk):
             self.lbl_total_dist.configure(text=f"Tổng chiều dài: {dist} m • {len(path)-1} chặng")
             route_text = ""
             for i, node in enumerate(path):
-                if i == 0: route_text += f"{i+1}. {node} (Xuất phát)\n\n"
-                else: route_text += f"{i+1}. {node} • {roads[path[i-1]][node]} m\n\n"
+                # Hiển thị số chặng
+                node_id_str = f"[{node_ids[node]}]"
+                if i == 0: 
+                    route_text += f"{i+1}. {node_id_str} {node} (Xuất phát)\n\n"
+                else: 
+                    route_text += f"{i+1}. {node_id_str} {node} • {roads[path[i-1]][node]} m\n\n"
             self.txt_route.insert("1.0", route_text)
             
         self.txt_route.configure(state="disabled")
@@ -283,11 +296,10 @@ class SmartWayUI(ctk.CTk):
             self.current_path = [start_node]
             self.draw_graph()
             
-            # Cập nhật ngay Text Lộ trình và Label Quãng đường
             self.lbl_total_dist.configure(text="Tổng chiều dài: 0 m • 0 chặng")
             self.txt_route.configure(state="normal")
             self.txt_route.delete("1.0", tk.END)
-            self.txt_route.insert("1.0", f"1. {start_node} (Bạn đã ở ngay tại đích!)")
+            self.txt_route.insert("1.0", f"1. [{node_ids[start_node]}] {start_node} (Bạn đã ở ngay tại đích!)")
             self.txt_route.configure(state="disabled")
             return
         # -----------------------------------------------
