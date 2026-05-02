@@ -175,7 +175,7 @@ class ModernAStarUI(ctk.CTk):
         
         self.canvas.delete(text_id)
         
-        # Vẽ background màu đen xám, viền xám sáng giống hình
+        # Background màu đen xám:
         self.canvas.create_polygon(
             x1+r, y1, x2-r, y1, x2, y1, x2, y1+r, x2, y2-r, x2, y2, x2-r, y2, x1+r, y2, x1, y2, x1, y2-r, x1, y1+r, x1, y1,
             smooth=True, fill="#18181b", outline="#a1a1aa", width=1.2
@@ -191,39 +191,39 @@ class ModernAStarUI(ctk.CTk):
                 x1, y1 = nodes[u]
                 x2, y2 = nodes[v]
                 
-                line_color = "#3f3f46" # Xám tối
+                line_color = "#3f3f46"
                 line_width = 2
                 
                 # Highlight đường đi bằng màu Xanh Ngọc
                 if path and ((u in path and v in path and abs(path.index(u) - path.index(v)) == 1)):
-                    line_color = "#86efac" # Xanh ngọc (Light Green)
+                    line_color = "#86efac" 
                     line_width = 4
 
                 self.canvas.create_line(x1, y1, x2, y2, fill=line_color, width=line_width)
 
-                # Vẽ trọng số
+                # Trọng số
                 mx, my = (x1 + x2) / 2, (y1 + y2) / 2
                 self.canvas.create_rectangle(mx-12, my-8, mx+12, my+8, fill="#1e1e24", outline="")
                 self.canvas.create_text(mx, my, text=str(roads[u][v]), fill="#a1a1aa", font=("Arial", 10))
 
         # 2. Vẽ các Node
         for loc, (x, y) in nodes.items():
-            fill_color = "#3f3f46" # Trạng thái mặc định: Xám
+            fill_color = "#3f3f46" 
             
-            # Tô màu theo hình ảnh thiết kế
+            # Tô màu
             if path:
                 if loc == path[0]:
-                    fill_color = "#a5b4fc" # Điểm bắt đầu: Xanh lam nhạt
+                    fill_color = "#a5b4fc" 
                 elif loc == path[-1]:
-                    fill_color = "#fecaca" # Điểm đích: Hồng nhạt
+                    fill_color = "#fecaca"
                 elif loc in path:
-                    fill_color = "#86efac" # Các điểm trung gian: Xanh ngọc
+                    fill_color = "#86efac" 
 
-            # Vẽ điểm tròn (Node)
+            # Điểm tròn (Node)
             r = 12
             self.canvas.create_oval(x-r, y-r, x+r, y+r, fill=fill_color, outline="#52525b", width=1)
             
-            # Vẽ Label (Viên thuốc) đè nhẹ lên node
+            # Label (Viên thuốc) 
             self.create_rounded_pill(x, y+15, loc)
 
     def update_stats(self, dist="---"):
